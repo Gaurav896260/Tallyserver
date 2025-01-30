@@ -180,8 +180,8 @@ app.post("/record-vote", async (req, res) => {
 });
 
 const sslOptions = {
-  key: fs.readFileSync("./server.key"),
-  cert: fs.readFileSync("./server.crt"),
+  key: fs.readFileSync("server.key"),
+  cert: fs.readFileSync("server.crt"),
 };
 
 https.createServer(sslOptions, app).listen(3003, () => {
