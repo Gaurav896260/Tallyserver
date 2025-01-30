@@ -116,7 +116,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error(err));
 
-app.post("/compute-tally", async (req, res) => {
+app.post("/api/compute-tally", async (req, res) => {
   try {
     const votes = await Voter.find();
     if (!votes.length) {
@@ -149,7 +149,7 @@ app.post("/compute-tally", async (req, res) => {
   }
 });
 
-app.post("/record-vote", async (req, res) => {
+app.post("/api/record-vote", async (req, res) => {
   const { voterId, vote } = req.body;
 
   if (!voterId || !vote) {
