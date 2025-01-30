@@ -4,7 +4,7 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const Voter = require("../Voter-server/Model/Voter");
+const Voter = require("./Voter.js");
 const crypto = require("crypto");
 // const forge = require("node-forge");
 require("dotenv").config();
