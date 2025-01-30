@@ -1,4 +1,3 @@
-const https = require("https");
 const express = require("express");
 const fs = require("fs");
 const bodyParser = require("body-parser");
@@ -6,7 +5,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const Voter = require("./Voter.js");
 const crypto = require("crypto");
-// const forge = require("node-forge");
 require("dotenv").config();
 const app = express();
 app.use(bodyParser.json());
@@ -114,9 +112,7 @@ function modInverse(a, m) {
 const elGamalKeys = generateElGamalKeyPair(1024);
 
 mongoose
-  .connect(
-    "mongodb+srv://shuklag868:118331@tsplab1.8ayne.mongodb.net/?retryWrites=true&w=majority&appName=TSPlab1"
-  )
+  .connect("your-mongodb-connection-string")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error(err));
 
@@ -130,12 +126,12 @@ app.post("/compute-tally", async (req, res) => {
     const decryptedVotes = votes.map((voter) => {
       const decryptedVoterId = elGamalDecrypt(
         elGamalKeys.privateKey,
-        JSON.parse(voter.voterId), // Make sure to parse the encrypted data properly
+        JSON.parse(voter.voterId),
         elGamalKeys.publicKey.p
       );
       const decryptedVote = elGamalDecrypt(
         elGamalKeys.privateKey,
-        JSON.parse(voter.vote), // Parse encrypted vote
+        JSON.parse(voter.vote),
         elGamalKeys.publicKey.p
       );
       return { voterId: decryptedVoterId, vote: decryptedVote };
@@ -161,13 +157,12 @@ app.post("/record-vote", async (req, res) => {
   }
 
   try {
-    /// Encrypt voterId and vote using the same public key
     const encryptedVoterId = elGamalEncrypt(elGamalKeys.publicKey, voterId);
     const encryptedVote = elGamalEncrypt(elGamalKeys.publicKey, vote);
 
     const newVote = new Voter({
-      voterId: JSON.stringify(encryptedVoterId), // Store as JSON strings
-      vote: JSON.stringify(encryptedVote), // Store as JSON strings
+      voterId: JSON.stringify(encryptedVoterId),
+      vote: JSON.stringify(encryptedVote),
       publicKey: JSON.stringify(elGamalKeys.publicKey),
     });
     await newVote.save();
@@ -179,11 +174,6 @@ app.post("/record-vote", async (req, res) => {
   }
 });
 
-const sslOptions = {
-  key: fs.readFileSync("server.key"),
-  cert: fs.readFileSync("server.crt"),
-};
-
-https.createServer(sslOptions, app).listen(3003, () => {
-  console.log("Tally Server running on https://localhost:3003");
+app.listen(3003, () => {
+  console.log("Tally Server running on http://localhost:3003");
 });
