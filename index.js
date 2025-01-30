@@ -72,21 +72,16 @@ function elGamalEncrypt(publicKey, message) {
 
 // ElGamal decryption function
 function elGamalDecrypt(privateKey, ciphertext, p) {
-  try {
-    const c1 = BigInt(`0x${ciphertext.c1}`);
-    const c2 = BigInt(`0x${ciphertext.c2}`);
-    const pBigInt = BigInt(`0x${p}`);
-    const privateKeyBigInt = BigInt(`0x${privateKey}`);
+  const c1 = BigInt(`0x${ciphertext.c1}`);
+  const c2 = BigInt(`0x${ciphertext.c2}`);
+  const pBigInt = BigInt(`0x${p}`);
+  const privateKeyBigInt = BigInt(`0x${privateKey}`);
 
-    const s = modExp(c1, privateKeyBigInt, pBigInt);
-    const sInv = modInverse(s, pBigInt);
-    const m = (c2 * sInv) % pBigInt;
+  const s = modExp(c1, privateKeyBigInt, pBigInt);
+  const sInv = modInverse(s, pBigInt);
+  const m = (c2 * sInv) % pBigInt;
 
-    return bigIntToString(m);
-  } catch (error) {
-    console.error("Decryption failed:", error);
-    return null; // Return null or a default value in case of failure
-  }
+  return bigIntToString(m);
 }
 
 function bigIntToString(bigInt) {
@@ -117,7 +112,9 @@ function modInverse(a, m) {
 const elGamalKeys = generateElGamalKeyPair(1024);
 
 mongoose
-  .connect("mongodb+srv://shuklag868:118331@tsplab1.8ayne.mongodb.net/?retryWrites=true&w=majority&appName=TSPlab1")
+  .connect(
+    "mongodb+srv://shuklag868:118331@tsplab1.8ayne.mongodb.net/?retryWrites=true&w=majority&appName=TSPlab1"
+  )
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error(err));
 
@@ -129,26 +126,19 @@ app.post("/api/compute-tally", async (req, res) => {
     }
 
     const decryptedVotes = votes.map((voter) => {
-      // Parse the JSON strings for voterId and vote
-      const encryptedVoterId = JSON.parse(voter.voterId);
-      const encryptedVote = JSON.parse(voter.vote);
-
-      // Decrypt the voterId and vote
       const decryptedVoterId = elGamalDecrypt(
         elGamalKeys.privateKey,
-        encryptedVoterId,
+        JSON.parse(voter.voterId),
         elGamalKeys.publicKey.p
       );
       const decryptedVote = elGamalDecrypt(
         elGamalKeys.privateKey,
-        encryptedVote,
+        JSON.parse(voter.vote),
         elGamalKeys.publicKey.p
       );
-
       return { voterId: decryptedVoterId, vote: decryptedVote };
     });
 
-    // Compute the tally
     const results = decryptedVotes.reduce((acc, curr) => {
       acc[curr.vote] = (acc[curr.vote] || 0) + 1;
       return acc;
@@ -160,6 +150,7 @@ app.post("/api/compute-tally", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 app.post("/api/record-vote", async (req, res) => {
   const { voterId, vote } = req.body;
 
