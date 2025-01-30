@@ -112,7 +112,7 @@ function modInverse(a, m) {
 const elGamalKeys = generateElGamalKeyPair(1024);
 
 mongoose
-  .connect("your-mongodb-connection-string")
+  .connect("mongodb+srv://shuklag868:118331@tsplab1.8ayne.mongodb.net/?retryWrites=true&w=majority&appName=TSPlab1")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error(err));
 
